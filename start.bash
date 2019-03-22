@@ -13,4 +13,4 @@ echo Copying local save file into docker container
 docker cp data/ df:/opt/dwarffortress/df_linux/
 
 echo "Exec into the container to start playing (run ./df)"
-docker exec -it df bash
+winpty docker exec -it df bash
