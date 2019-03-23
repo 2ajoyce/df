@@ -1,5 +1,10 @@
+# Windows 10 Home
 # docker build . -t df && docker run --name df -it df
 # docker cp data/ df:/opt/dwarffortress/df_linux/
+
+# Windows 10 Pro
+# docker build . -t df
+# winpty docker run -it --name df --mount type=bind,source=D:/Aaron/Code/dwarffortress/data,target=/opt/dwarffortress/df_linux/data df
 
 FROM ubuntu:latest
 
