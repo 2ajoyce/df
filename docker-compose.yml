@@ -1,6 +1,14 @@
-version: '3'
 services:
   dwarf-fortress:
     build: .
+    image: dwarf-fortress-web:latest
+    container_name: df-server
     ports:
-     - "5000:5000"
+      - "7681:6080"
+    volumes:
+      - df-save-data:/opt/df/data/save
+      - ./backups:/opt/df/backups
+    restart: unless-stopped
+
+volumes:
+  df-save-data:

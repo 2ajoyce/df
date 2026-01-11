@@ -1,0 +1,64 @@
+name: Test Just Commands
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+
+      - name: Install Just
+        uses: extractions/setup-just@v3
+
+      - name: Build Image (just update)
+        run: just update
+
+      - name: Start Services (just up)
+        run: just up
+
+      - name: Wait for startup
+        run: sleep 20
+
+      - name: Verify Service Health (Port Check)
+        run: |
+          curl -v --retry 5 --retry-connrefused http://localhost:7681/vnc.html
+
+      - name: Verify Container Processes
+        run: |
+          docker compose exec -T dwarf-fortress ps aux | grep -E "Xvfb|x11vnc|websockify|dwarfort"
+
+      - name: Check Logs for Success
+        run: |
+          just logs FLAGS="" | grep "Launching Dwarf Fortress..."
+
+      - name: Test Backup & Restore with Data Integrity
+        run: |
+          echo "1. Creating canary file in save directory..."
+          docker compose exec -T dwarf-fortress sh -c "mkdir -p /opt/df/data/save && echo 'canary-content' > /opt/df/data/save/canary.txt"
+
+          echo "2. Running backup..."
+          just backup FLAGS="-T"
+
+          BACKUP_FILE=$(ls backups/ | grep -v "/" | head -n 1)
+          echo "Found backup: $BACKUP_FILE"
+
+          echo "3. Deleting canary file..."
+          docker compose exec -T dwarf-fortress rm /opt/df/data/save/canary.txt
+
+          echo "4. Restoring backup..."
+          just restore FILE="$BACKUP_FILE" FLAGS="-T"
+
+          echo "5. Verifying command 'just backups' works..."
+          just backups
+
+          echo "6. Verifying canary file existence..."
+          docker compose exec -T dwarf-fortress cat /opt/df/data/save/canary.txt | grep "canary-content"
+
+      - name: Stop Services (just down)
+        run: just down
