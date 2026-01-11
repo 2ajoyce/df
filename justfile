@@ -49,3 +49,32 @@ restore FILE FLAGS="":
     @echo "Restarting server..."
     docker compose start dwarf-fortress
     @echo "Restore complete! Refresh your browser."
+
+# Run a smoke test to initialize world. Use while the browser is open to watch!
+smoke-test:
+    @echo "Activating Dwarf Fortress window and clicking 'Create New World'..."
+    docker compose exec -e DISPLAY=:1 dwarf-fortress xdotool search --name "Dwarf Fortress" windowactivate --sync
+    
+    @echo "Clicking 'Create New World' button..."
+    docker compose exec -e DISPLAY=:1 dwarf-fortress xdotool mousemove 640 440 mousedown 1 sleep 0.2 mouseup 1
+    @sleep 3
+    
+    @echo "Clicking 'Okay' on the welcome prompt..."
+    docker compose exec -e DISPLAY=:1 dwarf-fortress xdotool mousemove 640 300 mousedown 1 sleep 0.2 mouseup 1
+    @sleep 3
+    
+    @echo "Selecting 'Pocket' world size..."
+    docker compose exec -e DISPLAY=:1 dwarf-fortress xdotool mousemove 100 80 mousedown 1 sleep 0.2 mouseup 1
+    @sleep 1
+    
+    @echo "Confirming world generation..."
+    docker compose exec -e DISPLAY=:1 dwarf-fortress xdotool mousemove 800 750 mousedown 1 sleep 0.2 mouseup 1
+    @sleep 1
+    @echo "Check your browser! World generation should be starting."
+
+    @echo "Waiting 30 seconds for world generation to proceed..."
+    @sleep 10
+
+    @echo "Returning to main menu..."
+    docker compose exec -e DISPLAY=:1 dwarf-fortress xdotool mousemove 300 275 mousedown 1 sleep 0.2 mouseup 1
+    @sleep 3
