@@ -41,7 +41,10 @@ backups:
 restore FILE FLAGS="":
     @echo "Targeting backup: backups/{{FILE}}"
     @echo "WARNING: This will overwrite your current save! (Ctrl+C to abort)"
-    @sleep 3
+    @echo "10 seconds to abort..."
+    @sleep 1
+    @for i in 9 8 7 6 5 4 3 2 1; do echo "$i..."; sleep 1; done
+    @echo "Restoring"
     @echo "Stopping server..."
     docker compose stop dwarf-fortress
     @echo "Restoring..."
