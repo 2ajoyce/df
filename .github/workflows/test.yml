@@ -39,22 +39,28 @@ jobs:
           docker compose exec -T dwarf-fortress sh -c "mkdir -p /opt/df/data/save && echo 'canary-content' > /opt/df/data/save/canary.txt"
 
           echo "2. Running backup..."
-          just backup FLAGS="-T"
+          just backup
 
-          BACKUP_FILE=$(ls backups/ | grep -v "/" | head -n 1)
+          # Use the container's view of the backups folder to avoid sync issues on some CI runners
+          BACKUP_FILE=$(docker compose exec -T dwarf-fortress sh -c "ls /opt/df/backups | grep '\.tar\.gz' | sort -r | head -n 1" | tr -d '\r')
           echo "Found backup: $BACKUP_FILE"
 
+          if [ -z "$BACKUP_FILE" ]; then
+            echo "FAILED: No backup file found!"
+            exit 1
+          fi
+
           echo "3. Deleting canary file..."
-          docker compose exec -T dwarf-fortress rm /opt/df/data/save/canary.txt
+          docker compose exec -T dwarf-fortress sh -c "rm -f /opt/df/data/save/canary.txt"
 
           echo "4. Restoring backup..."
-          just restore FILE="$BACKUP_FILE" FLAGS="-T"
+          just restore "$BACKUP_FILE" 0
 
           echo "5. Verifying command 'just backups' works..."
           just backups
 
           echo "6. Verifying canary file existence..."
-          docker compose exec -T dwarf-fortress cat /opt/df/data/save/canary.txt | grep "canary-content"
+          docker compose exec -T dwarf-fortress sh -c "cat /opt/df/data/save/canary.txt" | grep "canary-content"
 
       - name: Stop Services (just down)
         run: just down
