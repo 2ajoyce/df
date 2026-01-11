@@ -14,7 +14,7 @@ This project allows you to run Dwarf Fortress in a Docker container and access i
 
 ## Commands
 
-Application
+### Application
 
 - Start: `just up`
 
@@ -26,7 +26,7 @@ Application
 
   - Existing saves may become unusable if the game version changes.
 
-Backups
+### Backups
 
 - Create Backup `just backup`
 
@@ -34,14 +34,14 @@ Backups
 
 - Restore Backup `just restore save-20260111_215551.tar.gz`
 
-SmokeTest
+### SmokeTest
 
 - Generate Pocket World `just smoke-test`
 
   - This will generate a pocket world and leave the UI on the main menu.
   - It does not select the game type or embark.
 
-Development
+### Development
 
 - View Logs: `just logs`
 
